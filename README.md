@@ -76,3 +76,20 @@ By adding this to routes.rb, rails now recognize the restful routes and will wor
 
 
 Notice that "form_for" used there is for ":sessions" and not "@user" because in the sessions controller @user is not defined and therefore need to manually tell rails what to do. In simple English, this translates to "form for sessions controller and execute the create action". By default, any prefix will be a post verb in "rails routes" IF the post verb is included in the prefix. To change the verb, it has to be explicitly stated in the html itself. This particular method will not be covered here. Now that this is done and over with, go back to sessions controller and modify the "create" action to include the code, "render 'new'". Try out in the browser. When any user tries to log in, nothing will happen but the page just refereshes because render 'new' means to render the 'new' file within our app/views/sessions/ as well as defined in sessions controller although that the action is empty.
+
+Now going back to sessions controller, the "crate" action need to know that there will be an email input and that email will go with the password that it was registered with. To do this, modify the "create" action;
+
+
+def create
+  user = User.find_by(email: params[:session][:email].downcase)
+  if user && user.authenticate(params[:session][:password])
+
+  else
+    render 'new'
+  end
+end
+
+
+"params[:session][:email]" is telling rails that there will be an email coming to log in but rails will not know where that email is coming from THUS "User.find_by" is used to tell rails to look for something from the database. Basically, when a user signed up, their email and password are stored into the database. "User.find_by" helps to look for a column in the database and "user = User.find_by(email: params[:session][:email].downcase) is telling rails that an email is coming from the database. If the email matched the one from the database, then rails will proceed. ".downcase" is just a function that downcases something. For example if the email is QWER@zzz.com, it will be qwer@zzz.com.
+
+"if user && user.authenticate(params[:session][:password])" means that if the user has submitted the email and the password that matches the email, therefore the user will proceed with logging in. However, if at least one of them is mismatched, the log in will not proceed.

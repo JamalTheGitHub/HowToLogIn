@@ -51,6 +51,28 @@ class UsersController < AplicationController
   end
 end
 
-"redirect_to @user" simply redirects the user who has created his/her account to her page via the "show" action. Rails is smart enough to know what is going on. In the Url browser it will look something like "localhost:3000/users/1" where the number "1" represents the id of the user that was just created. Now users can create an account to the web app but could not log in because we have not implement the login action yet.
+"redirect_to @user" simply redirects the user who has created his/her account to her page via the "show" action. Rails is smart enough to know what is going on. In the Url browser it will look something like "localhost:3000/users/1" where the number "1" represents the id of the user that was just created IF you try to sign up AGAIN after doing all the necessary procedures. Now users can create an account to the web app but could not log in because we have not implement the login action yet.
 
-Step 4: Login
+Step 4: Create a sessions controller. Inside the controller, add the 'new' , 'create' and 'destroy' action. After that, in the routes.rb, add the following code;
+
+
+  get 'login', to: 'sessions#cnew'
+  post 'login', to: 'sessions#create'
+  delete 'logout', to: 'sessions#destroy'
+
+
+By adding this to routes.rb, rails now recognize the restful routes and will work properly. Since there is an action 'new' in sessions controller, create a file called "new.html.erb" in the folder "app/views/sessions/". That "new" file is your login page but it is empty now since nothing was added to it. To create a login page, do the following;
+
+
+<%= form_for(:sessions, url: login_path) do |f| %>
+<%= f.label :email %>
+<%= f.email_field :email %>
+
+<%= f.label :password %>
+<%= f.password_field :password %>
+
+<%= f.submit "Log In" %>
+<% end %>
+
+
+Notice that "form_for" used there is for ":sessions" and not "@user" because in the sessions controller @user is not defined and therefore need to manually tell rails what to do. In simple English, this translates to "form for sessions controller and execute the create action". By default, any prefix will be a post verb in "rails routes" IF the post verb is included in the prefix. To change the verb, it has to be explicitly stated in the html itself. This particular method will not be covered here. Now that this is done and over with, go back to sessions controller and modify the "create" action to include the code, "render 'new'". Try out in the browser. When any user tries to log in, nothing will happen but the page just refereshes because render 'new' means to render the 'new' file within our app/views/sessions/ as well as defined in sessions controller although that the action is empty.

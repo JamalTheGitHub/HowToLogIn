@@ -40,9 +40,10 @@ To test if the root page has be successfully implemented in the <strong>routes.r
 
 Now go to the browser and enter the url <strong>localhost:3000</strong>. This will bring up the root page.
 
-Step 3: Add "resources :users" in the <strong>routes.rb</strong>. Now going back to <strong>Users controller</strong>, inside the <strong>"new" action</strong> add <strong>"@user = User.new"</strong>. The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the <strong>views/users/new</strong>. In the "new" erb, add ;
+Step 3: Add "resources :users" in the <strong>routes.rb</strong>. After that, in the terminal, enter <strong>rails routes</strong> to see restful routes and understand how they work. Now going back to <strong>Users controller</strong>, inside the <strong>"new" action</strong> add <strong>"@user = User.new"</strong>. The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the <strong>views/users/new</strong>. In the "new" erb, add ;
 
-
+    <h1>SIGN UP</h1>
+    
     <% form_for(@user) do |f| %>
     <%= f.label :email %>
     <%= f.text_field :email %>
@@ -52,13 +53,21 @@ Step 3: Add "resources :users" in the <strong>routes.rb</strong>. Now going back
 
     <%= f.label :password_confirmation %>
     <%= f.password_field :password_confirmation %>
-    <% f.submit "Create Account" %>
+    <%= f.submit "Create Account" %>
+    <% end %>
+
+
+NOTE: <strong>password_confirmation</strong> is just a way of making sure that the password typed in this box matches the password typed in the first box. Its fairly common in websites that requires the user to retype their password for confirmation. This will not affect the <strong>database</strong>. 
 
 
 In order to go to the sign up page, just add <strong>/users/new</strong> to the <strong>localhost:3000</strong> in the browser."<strong>form_for(@user)</strong>" refers to <strong>User.new</strong> as assigned with </strong>@user</strong> in the <strong>Users controller</strong>. Therefore, by submitting the form, it is telling rails that "Hey create this new user!". However this will not save the data to the database as the action <strong>create action</strong> was not even defined nor created in the <strong>Users controller</strong>. Now, update the <strong>Users controller</strong> so it might look something like;
 
 
     class UsersController < AplicationController
+
+      def show
+        @user = User.find(params[:id])
+      end
 
       def new
         @user = User.new
@@ -73,10 +82,6 @@ In order to go to the sign up page, just add <strong>/users/new</strong> to the 
         end
       end
 
-      def show
-        @user = User.find(params[:id])
-      end
-
 
       private
 
@@ -85,28 +90,31 @@ In order to go to the sign up page, just add <strong>/users/new</strong> to the 
       end
     end
 
-Inside <strong>create action</strong>, notice the <strong>@user = User.new(user_params)</strong> when previously it the <strong>new action</strong> it was just <strong>@user = User.new</strong>. Basically, <strong>user_params</strong> is a function called within the <strong>private</strong> section and is defined as "<strong>params.require(:user).permit(:email, :password, :password_confirmation)</strong>"
+Inside <strong>create action</strong>, notice the <strong>@user = User.new(user_params)</strong> when previously in the <strong>new action</strong> it was just <strong>@user = User.new</strong>. Basically, <strong>user_params</strong> is a function called within the <strong>private</strong> section and is defined as "<strong>params.require(:user).permit(:email, :password, :password_confirmation)</strong>". This is like telling rails "Alright permit all these attributes like email,password and password_confirmation if it was to be saved."
 
-Step 4: Create a sessions controller. Inside the controller, add the 'new' , 'create' and 'destroy' action. After that, in the routes.rb, add the following code;
-
-
-  get 'login', to: 'sessions#cnew'
-  post 'login', to: 'sessions#create'
-  delete 'logout', to: 'sessions#destroy'
+<strong>@user.save</strong> basically is what happens when the user clicked on <strong>f.submit "Create Account"</strong> in the <strong>apps/views/users/new</strong>. <strong>@user.save</strong> saves the informations typed by the user into the database with the permissions from <strong>user_params</strong>. Once the user clicked on "Create Account" they will be redirect to <strong>@user</strong> which was already defined in the <strong>show action</strong> as <strong>@user = User.find(params[:id])</strong>. This means that once the user created his account, an <strong>id</strong> will automatically be attached to it and it will be redirected to the users show(profile) page. Rails is smart enough to know this. However, if the information entered by the user is false or incomplete, the sign up page will just be rendered fresh again hence the code <strong>render 'new'</strong>. Before proceeding to the next step, add a new file called <strong>show.html.erb</strong> in the folder <strong>apps/views/users/</strong> to see what will happen if a user sign up. Upon signing up, the user will see something like <strong>localhost:3000/users/1</strong> where the integer 1 refers to the <strong>id</strong> of the user.
 
 
-By adding this to routes.rb, rails now recognize the restful routes and will work properly. Since there is an action 'new' in sessions controller, create a file called "new.html.erb" in the folder "app/views/sessions/". That "new" file is your login page but it is empty now since nothing was added to it. To create a login page, do the following;
+Step 4: Now, in order for the user to log in with their credentials, a session must be created for them. With this, create the <strong>Sessions controller</strong> with the action of <strong>new, create, destroy</strong>. Once done, go to the <strong>routes.rb</strong> and add the following;
 
 
-<%= form_for(:session, url: login_path) do |f| %>
-<%= f.label :email %>
-<%= f.email_field :email %>
+    get 'login', to: 'sessions#new'
+    post 'login', to: 'sessions#create'
+    delete 'logout', to: 'sessions#destroy'
 
-<%= f.label :password %>
-<%= f.password_field :password %>
 
-<%= f.submit "Log In" %>
-<% end %>
+To understand further what <strong>get,post,delete</strong> means, self-research is necessary. Once this is done, create a file called <strong>new.html.erb</strong> in <strong>apps/views/sessions/</strong> IF it is not created when creating the <strong>Sessions controller</strong>. In this <strong>new.html.erb</strong> file, put the following codes;
+
+    <h1>Log In</h1>
+    <%= form_for(:session, url: login_path) do |f| %>
+    <%= f.label :email %>
+    <%= f.email_field :email %>
+
+    <%= f.label :password %>
+    <%= f.password_field :password %>
+
+    <%= f.submit "Log In" %>
+    <% end %>
 
 
 Notice that "form_for" used there is for ":session" and not "@user" because it is creating a session for that particular user and to use the "login_path". By default, any prefix will be a "post" verb in "rails routes" IF the post verb is included in the prefix. To change the verb, it has to be explicitly stated in the html itself. This particular method will not be covered here. Now that this is done and over with, go back to sessions controller and modify the "create" action to include the code, "render 'new'". Try out in the browser. When any user tries to log in, nothing will happen but the page just refereshes because render 'new' means to render the 'new' file within our app/views/sessions/ as well as defined in sessions controller although that the action is empty.

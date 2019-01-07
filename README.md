@@ -103,7 +103,8 @@ Step 4: Now, in order for the user to log in with their credentials, a session m
     delete 'logout', to: 'sessions#destroy'
 
 
-To understand further what <strong>get,post,delete</strong> means, self-research is necessary. Once this is done, create a file called <strong>new.html.erb</strong> in <strong>apps/views/sessions/</strong> IF it is not created when creating the <strong>Sessions controller</strong>. In this <strong>new.html.erb</strong> file, put the following codes;
+To understand further what <strong>get,post,delete</strong> means, self-research is necessary. Once this is done, create a file called <strong>new.html.erb</strong> in <strong>apps/views/sessions/</strong> IF it is not created when creating the <strong>Sessions controller</strong>. In this <strong>new.html.erb</strong> file, put the following codes as this will be the log in page.
+
 
     <h1>Log In</h1>
     <%= form_for(:session, url: login_path) do |f| %>
@@ -117,24 +118,22 @@ To understand further what <strong>get,post,delete</strong> means, self-research
     <% end %>
 
 
-Notice that "form_for" used there is for ":session" and not "@user" because it is creating a session for that particular user and to use the "login_path". By default, any prefix will be a "post" verb in "rails routes" IF the post verb is included in the prefix. To change the verb, it has to be explicitly stated in the html itself. This particular method will not be covered here. Now that this is done and over with, go back to sessions controller and modify the "create" action to include the code, "render 'new'". Try out in the browser. When any user tries to log in, nothing will happen but the page just refereshes because render 'new' means to render the 'new' file within our app/views/sessions/ as well as defined in sessions controller although that the action is empty.
+To access this page, simply add <strong>/login</strong> into the browser. Notice previously it was <strong>form_for(@user)</strong> and now it is </strong>form_for(:session, url: login_path)</strong>. So what is going on? Well, basically <strong>:session</strong> is a built in rails method where it can be treated like an empty hash({}). "<strong>url: login_path</strong>" is basically just telling rails, "Hey! Go to this restful route here!" which will have 2 <strong>VERBS</strong> and they are <strong>get</strong> and <strong>post</strong> as defined inside the <strong>routes.rb</strong>. Notice that in <strong>routes.rb</strong>, the "<strong>post 'login', to: 'sessions#create'</strong>" is directing to the <strong>create action</strong> within the <strong>Sessions controller</strong> and currently the action now is empty and undefined.
 
-Now going back to sessions controller, the "crate" action need to know that there will be an email input and that email will go with the password that it was registered with. To do this, modify the "create" action;
-
-
-def create
-  user = User.find_by(email: params[:session][:email].downcase)
-  if user && user.authenticate(params[:session][:password])
-
-  else
-    render 'new'
-  end
-end
+Lets define it by adding the codes below;
 
 
-"params[:session][:email]" is telling rails that there will be an email coming to log in but rails will not know where that email is coming from THUS "User.find_by" is used to tell rails to look for something from the database. Also, "session" can be treated like a hash, {}. Basically, when a user signed up, their email and password are stored into the database. "User.find_by" helps to look for a column in the database and "user = User.find_by(email: params[:session][:email].downcase) is telling rails that an email is coming from the database. If the email matched the one from the database, then rails will proceed. ".downcase" is just a function that downcases something. For example if the email is QWER@zzz.com, it will be qwer@zzz.com.
+    def create
+      user = User.find_by(email: params[:session][:email].downcase)
+      if user && user.authenticate(params[:session][:password])
 
-"if user && user.authenticate(params[:session][:password])" means that if the user has submitted the email and the password that matches the email, therefore the user will proceed with logging in. However, if at least one of them is mismatched, the log in will not proceed. However, once all of this is done, the user is still not able to login because the session is not defined. Sure the user can enter the email and the respective password but this will not create the session for the user.
+      else
+        render 'new'
+      end
+    end
+
+
+<strong>user = User.find_by(email: params[:session][:email].downcase)</strong> is basically telling rails that "Hey! I am going to look for this email in the database and downcase it to put into this empty hash(:session) AND I will assign user to this email". That is basically it. To explain thoroughly is very TL;DR so in order to understand it better, once again, self-research is required. The next line <strong>user && user.authenticate(params[:session][:password])</strong> also is telling rails that "Okay, now I have assigned user to this email BUT before I can let user go, I need to know the password that goes together with this email so I can put it in a hash together with the email. If user submit wrong or incomplete form, I will just render this page again.". That is as layman as it can get.
 
 Step 5: To create a session for the user, a login method should be defined as well the "user.id". In order to do this, go to application_controller.rb in the controller folder and add the code "include SessionsHelper". The reason for this is to also inherit from rails "helpers" so the function can be called throughout the files within the controller folder.
 

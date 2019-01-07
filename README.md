@@ -2,9 +2,21 @@
 
 <strong>This is how to set up Login Application with Bcrypt</strong>
 
-Step 1: Add "gem 'bcrypt'" to Gemfile. Then create the database by running 'rails db:create'. Once done, create a home controller to set a root homepage via routes.rb.
+Step 1: Add <strong>"gem 'bcrypt'"</strong> to <strong>Gemfile</strong>. Then create the database by running <strong>'rails db:create'</strong>. Once done, create a Home controller via terminal and set the root page to index in <strong>routes.rb</strong>.
 
-Step 2: Create a User model and migration file via running the code "rails g model User email:string password_digest:string". Migrate it. Now create Users controller with the action "new". After that add "has_secure_password" to the model user.rb. When everything is done, use rails console to tests it with "User.new" and "user = User.new(email: "John@gmail.com" , password: "123")". If the password returns encrypted, move on to step 3. If not, try and figure out the problem and traceback the steps.
+    rails g controller Home index
+
+===================================
+
+  root 'home#index'
+
+Step 2: Create a User model and migration file via the terminal by running the code; 
+
+    rails g model User email:string password_digest:string 
+
+Once done, migrate it. After that create the Users controller with the action 'new'.
+
+    rails g controller Users new
 
 Step 3: Add "resources :users" in the routes.rb. Now going back to users controller, inside the "new" action add "@user = User.new". The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the views/users/new. In the "new" erb, add ;
 

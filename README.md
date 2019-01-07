@@ -2,21 +2,33 @@
 
 <strong>This is how to set up Login Application with Bcrypt</strong>
 
-Step 1: Add <strong>"gem 'bcrypt'"</strong> to <strong>Gemfile</strong>. Then create the database by running <strong>'rails db:create'</strong>. Once done, create a Home controller via terminal and set the root page to index in <strong>routes.rb</strong>.
+Step 1: Add <strong>"gem 'bcrypt'"</strong> to <strong>Gemfile</strong>. Then create the database by running <strong>'rails db:create'</strong>. Once done, create a <strong>Home controller</strong> via terminal and set the root page to index in <strong>routes.rb</strong>.
 
     rails g controller Home index
 
 ===================================
 
-  root 'home#index'
+    root 'home#index'
 
-Step 2: Create a User model and migration file via the terminal by running the code; 
+Step 2: Create a <strong>User model</strong> and migration file via the terminal by running the code; 
 
     rails g model User email:string password_digest:string 
 
-Once done, migrate it. After that create the Users controller with the action 'new'.
+Once done, migrate it. After that create the <strong>Users controller</strong> with the action 'new'.
 
     rails g controller Users new
+
+Before proceeding forward, go into the <strong>User model</strong> that was created and add this code to use the bcrypt functionality.
+
+    has_secure_password
+
+Basically the <strong>User model</strong> will look like this.
+
+    class User < ApplicationRecord
+      has_secure_password
+    end
+
+Once that settled, open rails console and test it by playing around with <strong>"User.new"</strong> and assigning a user with an email and password. The password should be encrypted because of the function <strong>has_secure_password</strong> in the <strong>User model</strong>.
 
 Step 3: Add "resources :users" in the routes.rb. Now going back to users controller, inside the "new" action add "@user = User.new". The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the views/users/new. In the "new" erb, add ;
 

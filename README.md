@@ -2,7 +2,11 @@
 
 <strong>This is how to set up Login Application with Bcrypt</strong>
 
-Step 1: Add <strong>"gem 'bcrypt'"</strong> to <strong>Gemfile</strong>. Then create the database by running <strong>'rails db:create'</strong>. Once done, create a <strong>Home controller</strong> via terminal and set the root page to index in <strong>routes.rb</strong>.
+Step 1: Add <strong>"gem 'bcrypt'"</strong> to <strong>Gemfile</strong>. Then create the database by running <strong>'rails db:create'</strong> in the terminal. Once done, create a <strong>Home controller</strong> via terminal and set the root page to index in <strong>routes.rb</strong>.
+
+    rails db:create
+
+===================================
 
     rails g controller Home index
 
@@ -28,54 +32,60 @@ Basically the <strong>User model</strong> will look like this.
       has_secure_password
     end
 
-Once that settled, open rails console and test it by playing around with <strong>"User.new"</strong> and assigning a user with an email and password. The password should be encrypted because of the function <strong>has_secure_password</strong> in the <strong>User model</strong>.
+Once that settled, open <strong>rails console</strong> and test it by playing around with <strong>"User.new"</strong> and assigning a user with an email and password. The password should be encrypted because of the function <strong>has_secure_password</strong> in the <strong>User model</strong>.
 
-Step 3: Add "resources :users" in the routes.rb. Now going back to users controller, inside the "new" action add "@user = User.new". The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the views/users/new. In the "new" erb, add ;
+To test if the root page has be successfully implemented in the <strong>routes.rb</strong>, fire up the rails server by executing this code in the terminal
 
+    rails s
 
-<% form_for(@user) do |f| %>
-<%= f.label :email %>
-<%= f.text_field :email %>
+Now go to the browser and enter the url <strong>localhost:3000</strong>. This will bring up the root page.
 
-<%= f.label :password %>
-<%= f.password_field :password %>
-
-<%= f.label :password_confirmation %>
-<%= f.password_field :password_confirmation %>
-<% f.submit "Create Account" %>
+Step 3: Add "resources :users" in the <strong>routes.rb</strong>. Now going back to <strong>Users controller</strong>, inside the <strong>"new" action</strong> add <strong>"@user = User.new"</strong>. The "@user" will corresponds later when we create the form. Now, create the sign up webpage using the <strong>views/users/new</strong>. In the "new" erb, add ;
 
 
-"form_for(@user)" refers to the action of "new" in the users controller hence why this "@user = User.new" was added. However this will not save the data to the database as the action 'create' in the users controller is still nil. Update the users controller so it might look something like this;
+    <% form_for(@user) do |f| %>
+    <%= f.label :email %>
+    <%= f.text_field :email %>
+
+    <%= f.label :password %>
+    <%= f.password_field :password %>
+
+    <%= f.label :password_confirmation %>
+    <%= f.password_field :password_confirmation %>
+    <% f.submit "Create Account" %>
 
 
-class UsersController < AplicationController
+In order to go to the sign up page, just add <strong>/users/new</strong> to the <strong>localhost:3000</strong> in the browser."<strong>form_for(@user)</strong>" refers to <strong>User.new</strong> as assigned with </strong>@user</strong> in the <strong>Users controller</strong>. Therefore, by submitting the form, it is telling rails that "Hey create this new user!". However this will not save the data to the database as the action <strong>create action</strong> was not even defined nor created in the <strong>Users controller</strong>. Now, update the <strong>Users controller</strong> so it might look something like;
 
-  def new
-    @user = User.new
-  end
 
-  def show
-    @user = User.find(params[:id])
-  end
+    class UsersController < AplicationController
 
-  def create
-    @user = User.new(user_params)
-    if @user.save
-      redirect_to @user
-    else
-      render 'new'
+      def new
+        @user = User.new
+      end
+
+      def create
+        @user = User.new(user_params)
+        if @user.save
+          redirect_to @user
+        else
+          render 'new'
+        end
+      end
+
+      def show
+        @user = User.find(params[:id])
+      end
+
+
+      private
+
+      def user_params
+        params.require(:user).permit(:email, :password, :password_confirmation)
+      end
     end
-  end
 
-
-  private
-
-  def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation)
-  end
-end
-
-"redirect_to @user" simply redirects the user who has created his/her account to her page via the "show" action. Rails is smart enough to know what is going on. In the Url browser it will look something like "localhost:3000/users/1" where the number "1" represents the id of the user that was just created IF you try to sign up AGAIN after doing all the necessary procedures. Now users can create an account to the web app but could not log in because we have not implement the login action yet.
+Inside <strong>create action</strong>, notice the <strong>@user = User.new(user_params)</strong> when previously it the <strong>new action</strong> it was just <strong>@user = User.new</strong>. Basically, <strong>user_params</strong> is a function called within the <strong>private</strong> section and is defined as "<strong>params.require(:user).permit(:email, :password, :password_confirmation)</strong>"
 
 Step 4: Create a sessions controller. Inside the controller, add the 'new' , 'create' and 'destroy' action. After that, in the routes.rb, add the following code;
 

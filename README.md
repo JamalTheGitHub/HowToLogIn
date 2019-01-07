@@ -1,6 +1,6 @@
 # README
 
-This is how to set up Login Application with Bcrypt
+<strong>This is how to set up Login Application with Bcrypt</strong>
 
 Step 1: Add "gem 'bcrypt'" to Gemfile. Then create the database by running 'rails db:create'. Once done, create a home controller to set a root homepage via routes.rb.
 

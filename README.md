@@ -118,7 +118,7 @@ To understand further what <strong>get,post,delete</strong> means, self-research
     <% end %>
 
 
-To access this page, simply add <strong>/login</strong> into the browser. Notice previously it was <strong>form_for(@user)</strong> and now it is </strong>form_for(:session, url: login_path)</strong>. So what is going on? Well, basically <strong>:session</strong> is a built in rails method where it can be treated like an empty hash({}). "<strong>url: login_path</strong>" is basically just telling rails, "Hey! Go to this restful route here!" which will have 2 <strong>VERBS</strong> and they are <strong>get</strong> and <strong>post</strong> as defined inside the <strong>routes.rb</strong>. Notice that in <strong>routes.rb</strong>, the "<strong>post 'login', to: 'sessions#create'</strong>" is directing to the <strong>create action</strong> within the <strong>Sessions controller</strong> and currently the action now is empty and undefined.
+To access this page, simply add <strong>/login</strong> into the browser. Notice previously it was <strong>form_for(@user)</strong> and now it is <strong>form_for(:session, url: login_path)</strong>. So what is going on? Well, basically <strong>:session</strong> is a built in rails method where it can be treated like an empty hash({}). "<strong>url: login_path</strong>" is basically just telling rails, "Hey! Go to this restful route here!" which will have 2 <strong>VERBS</strong> and they are <strong>get</strong> and <strong>post</strong> as defined inside the <strong>routes.rb</strong>. Notice that in <strong>routes.rb</strong>, the "<strong>post 'login', to: 'sessions#create'</strong>" is directing to the <strong>create action</strong> within the <strong>Sessions controller</strong> and currently the action now is empty and undefined.
 
 Lets define it by adding the codes below;
 
@@ -133,11 +133,15 @@ Lets define it by adding the codes below;
     end
 
 
-<strong>user = User.find_by(email: params[:session][:email].downcase)</strong> is basically telling rails that "Hey! I am going to look for this email in the database and downcase it to put into this empty hash(:session) AND I will assign user to this email". That is basically it. To explain thoroughly is very TL;DR so in order to understand it better, once again, self-research is required. The next line <strong>user && user.authenticate(params[:session][:password])</strong> also is telling rails that "Okay, now I have assigned user to this email BUT before I can let user go, I need to know the password that goes together with this email so I can put it in a hash together with the email. If user submit wrong or incomplete form, I will just render this page again.". That is as layman as it can get.
+<strong>user = User.find_by(email: params[:session][:email].downcase)</strong> is basically telling rails that "Hey! I am going to look for this <strong>email(email:)</strong> in the database and <strong>downcase(.downcase)</strong> it to put into this empty <strong>hash(:session)</strong> AND I will assign user to this <strong>email(:email)</strong>". That is basically it. To explain thoroughly is very TL;DR so in order to understand it better, once again, self-research is required. The next line <strong>user && user.authenticate(params[:session][:password])</strong> also is telling rails that "Okay, now I have assigned user to this email BUT before I can let user go, I need to know the <strong>password(:password)</strong> that goes together with this email so I can put it in a <strong>hash(:session)</strong> together with the email. If user submit wrong or incomplete form, I will just render this page again.". This is as layman as it can get.
 
-Step 5: To create a session for the user, a login method should be defined as well the "user.id". In order to do this, go to application_controller.rb in the controller folder and add the code "include SessionsHelper". The reason for this is to also inherit from rails "helpers" so the function can be called throughout the files within the controller folder.
+Step 5: Before attempting to log in(you can try if you want but there will be an error I believe), create <strong>Sessions helper</strong> file inside <strong>app/helpers/</strong> called <strong>sessions_helper.rb</strong> IF the file has not been created. Again, if the curiousity peaks the roof on what helpers actually do, self-research it!
 
-Now, within the "helpers" folder, open a file called "sessions_helper.rb". In that file, add 4 methods, log_in(user), current_user, logged_in? and log_out. It will look something like as below;
+Next, open the <strong>application_controller.rb</strong> inside the <strong>app/controllers/</strong> and add the following code in order to include the <strong>Sessions helper</strong> so that it can be used throughout the whole of <strong>app/controllers/</strong>.
+
+    include SessionsHelper
+
+Now open the file called <strong>sessions_helper.rb</strong>. Add the following actions, <strong>log_in(user)</strong>, <strong>current_user</strong>, <strong>logged_in?</strong> and <strong>log_out</strong>. The names of these actions are pretty self-explanatory. Basically, if done correctly, it will look like below;
 
 
   module SessionsHelper
@@ -159,18 +163,23 @@ Now, within the "helpers" folder, open a file called "sessions_helper.rb". In th
   end
 
 
-Initially, log_in needs to be defined so that rails will know that "Oh this particular email and password matches therefore I must create a session for the user!". With that being said add the following code to "log_in" method,
-"session[:user_id] = user.id". What this does is that it creates a temporary cookie using the rails session method which is automatically encrypted.
-
-Next, current_user method needs to be defined so that it will be easier to call it in the view files or controllers. For the method, add the codes below;
+The action <strong>log_in(user)</strong> need to be defined in such a way that once the email and password matches, the user will be able to proceed accordingly. With that being said add the following code to <strong>log_in(user)</strong>;
 
 
-if session[:user_id]
-  @current_user ||= User.find_by(id: session[:user_id])
-end
+    user.id = session[:user_id]
 
 
-Test it in rails console;
+All will be explained later. Next, add the following codes to <strong>current_user</strong>;
+
+
+  if session[:user_id]
+    @current_user ||= User.find_by(id: session[:user_id])
+  end
+
+
+Basically, <strong>@current_user</strong> if it is not assigned, it will be nil BUT if assigned, it will tell rails to match the <strong>@current_user</strong> with the assigned <strong>id</strong> provided by user.id when the <strong>log_in(user)</strong> action was executed.
+
+Now, test it in the rails console;
 
 1)Assign session to a hash. Then run the code; session[:user_id] and see output.
 
@@ -185,59 +194,95 @@ Test it in rails console;
 6)Exit rails console.
 
 
-Now that it has been tested in rails console and it works, understand that @current_user is nil because it is undefined global instance. "||=" means "OR EQUALS TO". It is quite hectic to explain the type of expressions available in rails but for further understanding, an independent research will help significantly.
+Aftter testing it in the rails console, if it is hard to understand what is going on in this part of town, self-research is always a good option as it will cover some of the things that were explained lightly or not at all.
 
-Next is to indentify if the user is logged in or not. This function can also be used in views to enable certain functions to users who are already logged in. With that, just add "!current_user?" to the "logged_in?" method within the helper. What this means is that if current_user is not nil, then do ..... . It just simply means that. The exclamation(!) at the beginning means NOT.
+Now onto the next action, <strong>logged_in?</strong>. Notice that this is a boolean action as it just checks for true or false due to the "?" being at the end of the action. Inside this action, add <strong>!current_user.nil?</strong> and that is it. It is just checking whether the user is logged in or not. The expression is making sure that the <strong>current_user</strong> cannot be nil because if it is nil, it means nobody is logged in.
 
-To log out, simply delete the session that was created by the user and make sure that the @current_user is nil. Just add the code, "session.delete(:user_id)" and "@current_user = nil". All in all if done correctly, it will look like the following;
+The final part will be the <strong>log_out</strong> which is just deleting the session and assigning nil to the <strong>@current_user</strong>. Just add the codes;
 
 
-module SessionsHelper
-  def log_in(user)
-    session[:user_id] = user.id
-  end
-
-  def current_user
-    if session[:user_id]
-      @current_user ||= User.find_by(id: session[:user_id])
-    end
-  end
-
-  def logged_in?
-    !current_user.nil?
-  end
-
-  def log_out
     session.delete(:user_id)
     @current_user = nil
-  end    
-end
 
 
-Step 6: Now that the helper is done, connect it with the sessions controller by updating the controller to look like as follows;
+Now, the final product will look like as below;
 
 
-class SessionsController < ApplicationController
-  def new
-  end
+    module SessionsHelper
+      def log_in(user)
+        session[:user_id] = user.id
+      end
 
-  def create
-    user = User.find_by(email: params[:session][:email].downcase)
-    if user && user.authenticate(params[:session][:password])
-      log_in user
-      redirect_to user
-    else
-      render 'new'
+      def current_user
+        if session[:user_id]
+          @current_user ||= User.find_by(id: session[:user_id])
+        end
+      end
+
+      def logged_in?
+        !current_user.nil?
+      end
+
+      def log_out
+        session.delete(:user_id)
+        @current_user = nil
+      end    
     end
-  end
-
-  def destroy
-    log_out
-    redirect_to root_url
-  end
-end
 
 
-What is left now is to create links from the root page to sign up and login. Once logged in, create a log out link and those links must corresponds to the restful routes created with their own prefixs and verbs.
+Step 6: Now that the helper is done, connect it with the <strong>Sessions controller</strong> by updating the controller to look like as follows;
 
-That is it, this is a basic login/logout with bcrypt gem.
+
+    class SessionsController < ApplicationController
+      def new
+      end
+
+      def create
+        user = User.find_by(email: params[:session][:email].downcase)
+        if user && user.authenticate(params[:session][:password])
+          log_in user
+          redirect_to user
+        else
+          render 'new'
+        end
+      end
+
+      def destroy
+        log_out
+        redirect_to root_url
+      end
+    end
+
+
+Now the explanation of <strong>log_in(user)</strong> comes in handy. So what is going on now is that assuming that the password and email matches, what happens is that rails is assigning the <strong>id</strong> of the user with the email and the password to the hash so that everything else that is also connected to said <strong>id</strong> is accessable. That is basically it.
+
+However small changes needed to be made so that the user will have a smooth transition of signing up, logging in and eventually log out. So let's revisit <strong>Users controller</strong> and update the <strong>create action</strong>;
+
+
+    def create
+      @user = User.new(user_params)
+      if @user.save
+        redirect_to login_path
+      else
+        render 'new'
+      end
+    end
+
+
+Now when the user has successfully sign up, he/she will be redirected to the login page. In order to know if the user is logged in or not, we can modify the <strong>app/views/users/show.html.erb</strong> to include the <strong>@current_user</strong> code. Just simply put;
+
+
+    Welcome <%= @current_user.email %>
+
+
+Now, when the user sign in, he/she will be greeted. On a final note, to log out, simply add the link to log out with the correct verb. In the same page as the greet when they log in, just add a few more codes;
+
+    Welcome <%= @current_user.email %>
+
+
+    <% if logged_in? %>
+    <%= link_to "Log Out", url: logout_path, method: :delete %>
+    <% end %>
+
+
+And that is it with creating a sign up, sign in and log out with the <strong>bcrypt</strong> gem.

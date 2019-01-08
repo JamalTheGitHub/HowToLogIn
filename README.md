@@ -144,29 +144,29 @@ Next, open the <strong>application_controller.rb</strong> inside the <strong>app
 Now open the file called <strong>sessions_helper.rb</strong>. Add the following actions, <strong>log_in(user)</strong>, <strong>current_user</strong>, <strong>logged_in?</strong> and <strong>log_out</strong>. The names of these actions are pretty self-explanatory. Basically, if done correctly, it will look like below;
 
 
-  module SessionsHelper
-    def log_in(user)
-
+    module SessionsHelper
+      def log_in(user)
+  
+      end
+  
+      def current_user
+  
+      end
+  
+      def logged_in?
+  
+      end
+  
+      def log_out
+  
+      end    
     end
-
-    def current_user
-
-    end
-
-    def logged_in?
-
-    end
-
-    def log_out
-
-    end    
-  end
 
 
 The action <strong>log_in(user)</strong> need to be defined in such a way that once the email and password matches, the user will be able to proceed accordingly. With that being said add the following code to <strong>log_in(user)</strong>;
 
 
-    user.id = session[:user_id]
+    session[:user_id] = user.id
 
 
 All will be explained later. Next, add the following codes to <strong>current_user</strong>;
@@ -281,7 +281,7 @@ Now, when the user sign in, he/she will be greeted. On a final note, to log out,
 
 
     <% if logged_in? %>
-    <%= link_to "Log Out", url: logout_path, method: :delete %>
+    <%= link_to "Log Out", logout_path, method: :delete %>
     <% end %>
 
 
